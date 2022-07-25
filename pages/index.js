@@ -5,10 +5,8 @@ import styles from "../styles/Home.module.css";
 import { Button, TextField } from "@mui/material";
 
 export default function Home() {
-  const [weatherData, setWeatherData] = useState("");
   const [formData, setFormData] = useState();
   const [results, setResults] = useState();
-  useEffect(() => {}, [results]);
 
   const handleClick = async () => {
     let formDataArray = formData.split(",");
@@ -17,17 +15,31 @@ export default function Home() {
     console.log(formDataArray);
     for (let i = 0; i < formDataArray.length; i++) {
       const trimZip = formDataArray[i].trim();
-      console.log("hit");
-      fetch(
-        `http://api.weatherapi.com/v1/current.json?key=0d577d442bb44bb1a32231355222307&q=${trimZip}&aqi=no`
-      )
-        .then((response) => response.json())
-        .then((data) => {
-          resultsArray.push(
-            `Zip Code: ${trimZip} -- Current Temp: ${data?.current?.temp_f}`
-          );
-          console.log("inside foreach", resultsArray);
-        });
+      try {
+        const response = await fetch(
+          `http://api.weatherapi.com/v1/current.json?key=0d577d442bb44bb1a32231355222307&q=${trimZip}&aqi=no`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error! status: ${response.status}`);
+        }
+
+        const JSONresult = await response.json();
+        const results = JSON.stringify(JSONresult);
+
+        console.log("result is: ", JSON.stringify(results));
+        resultsArray.push(
+          `Zip Code: ${trimZip} -- Current Temp: ${JSONresult?.current?.temp_f}`
+        );
+      } catch (err) {
+        console.log(err);
+      }
     }
     console.log("ending", resultsArray);
     await setResults(resultsArray);
