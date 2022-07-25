@@ -8,36 +8,29 @@ export default function Home() {
   const [weatherData, setWeatherData] = useState("");
   const [formData, setFormData] = useState();
   const [results, setResults] = useState();
-  // useEffect(() => {
-  //   fetch(
-  //     "http://api.weatherapi.com/v1/current.json?key=0d577d442bb44bb1a32231355222307&q=London&aqi=no"
-  //   )
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       setWeatherData(data.current.cloud);
-  //       console.log(data.current.cloud);
-  //     });
-  // }, []);
+  useEffect(() => {}, [results]);
+
   const handleClick = async () => {
     let formDataArray = formData.split(",");
+    console.log("what is formdata", formDataArray);
+    let resultsArray = [];
     console.log(formDataArray);
-    const resultsArray = formDataArray.map(async (zip) => {
-      const trimZip = zip.trim();
+    for (let i = 0; i < formDataArray.length; i++) {
+      const trimZip = formDataArray[i].trim();
+      console.log("hit");
       fetch(
         `http://api.weatherapi.com/v1/current.json?key=0d577d442bb44bb1a32231355222307&q=${trimZip}&aqi=no`
       )
         .then((response) => response.json())
-        .then(async (data) => {
-          // resultsArray.push(
-          //   `Zip Code: ${trimZip} -- Current Temp: ${data?.current?.temp_f}`
-          // );
-          console.log(resultsArray);
-          // return setResults(resultsArray);
-          return `Zip Code: ${trimZip} -- Current Temp: ${data?.current?.temp_f}`;
+        .then((data) => {
+          resultsArray.push(
+            `Zip Code: ${trimZip} -- Current Temp: ${data?.current?.temp_f}`
+          );
+          console.log("inside foreach", resultsArray);
         });
-    });
+    }
     console.log("ending", resultsArray);
-    setResults(resultsArray);
+    await setResults(resultsArray);
   };
 
   return (
@@ -58,13 +51,14 @@ export default function Home() {
       <Button onClick={handleClick} variant="outlined">
         SUBMIT
       </Button>
-      {results?.map((result) => {
-        return (
-          <div key={result}>
-            <p>{result}</p>
-          </div>
-        );
-      })}
+      {results &&
+        results?.map((result) => {
+          return (
+            <div key={result}>
+              <p>{result}</p>
+            </div>
+          );
+        })}
     </div>
   );
 }
